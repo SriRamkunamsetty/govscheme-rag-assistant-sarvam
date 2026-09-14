@@ -1,14 +1,16 @@
 # Scheme Sahayak — Government Scheme RAG Assistant
 
 <p align="center">
+  <a href="https://govscheme-sarvam.vercel.app/"><img src="https://img.shields.io/badge/Live_Demo-govscheme--sarvam.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo on Vercel" /></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+" /></a>
   <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
   <a href="https://www.sarvam.ai/"><img src="https://img.shields.io/badge/Sarvam_AI-105B_LLM-EA580C?style=for-the-badge" alt="Sarvam AI 105B" /></a>
   <a href="https://www.sarvam.ai/"><img src="https://img.shields.io/badge/Voice_TTS-Bulbul_v3-7928CA?style=for-the-badge" alt="Sarvam Bulbul v3" /></a>
   <img src="https://img.shields.io/badge/Hybrid_RAG-BM25_%2B_TF--IDF-0284C7?style=for-the-badge" alt="Hybrid RAG" />
   <img src="https://img.shields.io/badge/Indic_Languages-11_Supported-16A34A?style=for-the-badge" alt="11 Indic Languages" />
-  <a href="https://vercel.com/"><img src="https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" /></a>
 </p>
+
+> 🌐 **Live Vercel Deployment:** [Scheme Sahayak — Government Scheme Assistant](https://govscheme-sarvam.vercel.app/)
 
 Ask a question about an Indian government welfare scheme in any Indian language (Telugu, Hindi, Tamil, Kannada, Bengali, Marathi, Gujarati, Malayalam, Punjabi, Odia) or English, and receive an authoritative answer grounded in real scheme documents — translated back into your preferred language with full source provenance.
 
@@ -129,7 +131,7 @@ The project is pre-configured with zero-config Vercel Serverless Python support 
    - In the Vercel project configuration, add:
      - `SARVAM_API_KEY`: Your Sarvam AI API Key (`sk_7dobwl3v_cqg8ysqLjDMQdrLeqdALOwjH`).
 3. **Deploy**:
-   - Click **Deploy**. Your application will be live at `https://govscheme-rag-assistant-sarvam.vercel.app`.
+   - Click **Deploy**. Your application is live at **[https://govscheme-sarvam.vercel.app/](https://govscheme-sarvam.vercel.app/)**.
    - The FastAPI backend runs as a high-performance Serverless Function at `/api/*`, and the frontend is instantly served across global CDN Edge locations.
 
 ---
