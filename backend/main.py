@@ -18,7 +18,7 @@ import re
 from collections import Counter, defaultdict
 from typing import Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import APIRouter, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -82,7 +82,10 @@ except ImportError:
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from documents import SCHEME_DOCS
+try:
+    from documents import SCHEME_DOCS
+except ImportError:
+    from backend.documents import SCHEME_DOCS
 
 # ---------------------------------------------------------------------------
 # 1. Supported Languages Configuration
@@ -367,10 +370,13 @@ class TTSRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# 6. REST API Endpoints
+# 6. REST API Endpoints (Mounted at both / and /api for Vercel Serverless)
 # ---------------------------------------------------------------------------
 
-@app.get("/")
+api_router = APIRouter()
+
+
+@api_router.get("/")
 def root():
     return {
         "service": "Scheme Sahayak (Government Scheme RAG Assistant)",
@@ -382,7 +388,7 @@ def root():
     }
 
 
-@app.get("/health")
+@api_router.get("/health")
 def health_check():
     return {
         "status": "healthy",
@@ -393,13 +399,13 @@ def health_check():
     }
 
 
-@app.get("/languages")
+@api_router.get("/languages")
 def list_languages():
     """Returns supported Indic languages for the frontend language selector."""
     return {"languages": SUPPORTED_LANGUAGES}
 
 
-@app.get("/schemes")
+@api_router.get("/schemes")
 def list_schemes():
     """Returns complete catalog of indexed schemes with categories and metadata."""
     return {
@@ -420,7 +426,7 @@ def list_schemes():
     }
 
 
-@app.post("/ask")
+@api_router.post("/ask")
 def ask(payload: QuestionRequest):
     clean_question = payload.question.strip()
     target_lang = payload.target_language_code or "te-IN"
@@ -550,7 +556,7 @@ def ask(payload: QuestionRequest):
     }
 
 
-@app.post("/tts")
+@api_router.post("/tts")
 def text_to_speech(payload: TTSRequest):
     """
     Synthesizes speech in any supported Indian language using Sarvam AI Bulbul v3.
@@ -589,3 +595,11 @@ def text_to_speech(payload: TTSRequest):
         "language_code": lang_code,
         "mode": "demo",
     }
+
+
+# ---------------------------------------------------------------------------
+# 7. Router Mounting: Dual / and /api Prefix Registration
+# ---------------------------------------------------------------------------
+app.include_router(api_router)
+app.include_router(api_router, prefix="/api")
+

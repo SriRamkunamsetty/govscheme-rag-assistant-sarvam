@@ -107,8 +107,26 @@ Navigate to `http://localhost:3000` (or open `frontend/index.html` as a local fi
 
 ---
 
+## Deploy to Vercel
+
+The project is pre-configured with zero-config Vercel Serverless Python support (`vercel.json`, `api/index.py`, and `public/index.html`).
+
+### Steps to Deploy:
+1. **Import to Vercel**:
+   - Go to [vercel.com/new](https://vercel.com/new) and import your GitHub repository: `SriRamkunamsetty/govscheme-rag-assistant-sarvam`.
+   - Vercel automatically detects `vercel.json` and Python requirements.
+2. **Set Environment Variables**:
+   - In the Vercel project configuration, add:
+     - `SARVAM_API_KEY`: Your Sarvam AI API Key (`sk_7dobwl3v_cqg8ysqLjDMQdrLeqdALOwjH`).
+3. **Deploy**:
+   - Click **Deploy**. Your application will be live at `https://govscheme-rag-assistant-sarvam.vercel.app`.
+   - The FastAPI backend runs as a high-performance Serverless Function at `/api/*`, and the frontend is instantly served across global CDN Edge locations.
+
+---
+
 ## Tech Stack
 
 - **Backend:** FastAPI, `scikit-learn` (TF-IDF), `rank_bm25` (with pure-Python fallback), `langchain-text-splitters`, Sarvam AI SDK (`bulbul:v3` TTS, `sarvam-105b` LLM, Translate).
 - **Frontend:** Single-file HTML5/CSS3/Vanilla JS with native DOM manipulation, Google Fonts (Noto Sans for Telugu, Devanagari, Tamil, Kannada, Bengali), Web Speech API.
 - **AI Models:** Sarvam `sarvam-105b` (LLM Generation), Sarvam Translate (Language translation), Sarvam Bulbul:v3 (Text-to-Speech).
+- **Deployment:** Vercel (Serverless Python runtime + Edge Network static hosting).
