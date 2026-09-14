@@ -171,7 +171,7 @@
     width: 100%;
     font-family: inherit;
     font-size: 15.5px;
-    padding: 14px 16px;
+    padding: 14px 46px 14px 16px;
     border: 1.5px solid var(--border);
     border-radius: 10px;
     background: var(--surface);
@@ -183,6 +183,38 @@
     outline: none;
     border-color: var(--gold);
     box-shadow: 0 0 0 3px rgba(184, 132, 46, 0.18);
+  }
+
+  .mic-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    font-size: 19px;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .mic-btn:hover {
+    transform: translateY(-50%) scale(1.15);
+    background: rgba(184, 132, 46, 0.12);
+  }
+
+  .mic-btn.recording {
+    animation: micPulse 0.9s infinite alternate;
+    background: rgba(220, 53, 69, 0.18);
+  }
+
+  @keyframes micPulse {
+    0% { transform: translateY(-50%) scale(1); filter: drop-shadow(0 0 2px #d32f2f); }
+    100% { transform: translateY(-50%) scale(1.22); filter: drop-shadow(0 0 6px #d32f2f); }
   }
 
   button.ask-btn {
@@ -203,6 +235,48 @@
   button.ask-btn:active { transform: scale(0.98); }
   button.ask-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   button.ask-btn:disabled { opacity: 0.6; cursor: progress; }
+
+  /* Audio Voice Player Controls */
+  .audio-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .listen-btn {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    background: #F0EFEA;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-chip);
+    padding: 6px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+
+  .listen-btn:hover {
+    background: var(--gold-light);
+    border-color: var(--gold);
+    color: var(--gold-deep);
+  }
+
+  .listen-btn.playing {
+    background: var(--gold-deep);
+    color: #FFFFFF;
+    border-color: var(--gold-deep);
+    box-shadow: 0 2px 8px rgba(150, 105, 30, 0.3);
+  }
+
+  .listen-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
 
   /* Category Filter Chips */
   .category-bar {
@@ -512,6 +586,7 @@
   <form class="ask" id="ask-form">
     <div class="input-wrap">
       <input type="text" id="question-input" placeholder="e.g. Is there a housing scheme for low income families?" autocomplete="off" maxlength="500" required>
+      <button type="button" class="mic-btn" id="mic-btn" title="Speak your question">🎙️</button>
     </div>
     <button type="submit" class="ask-btn" id="ask-btn">Ask Sahayak</button>
   </form>
@@ -594,6 +669,22 @@
     "od-IN": "font-hi",
     "en-IN": "font-en"
   };
+
+  const LISTEN_LABELS = {
+    "te-IN": "వినండి (Listen)",
+    "hi-IN": "सुनिए (Listen)",
+    "ta-IN": "கேளுங்கள் (Listen)",
+    "kn-IN": "ಕೇಳಿ (Listen)",
+    "bn-IN": "শুনুন (Listen)",
+    "mr-IN": "ऐका (Listen)",
+    "gu-IN": "સાંભળો (Listen)",
+    "ml-IN": "കേൾക്കുക (Listen)",
+    "pa-IN": "ਸੁਣੋ (Listen)",
+    "od-IN": "ଶୁଣନ୍ତୁ (Listen)",
+    "en-IN": "Listen"
+  };
+
+  let activeAudio = null;
 
   const FALLBACK_SCHEMES = [
     { title: "PM-KISAN", category: "Agriculture & Farmers" },
@@ -706,6 +797,115 @@
     verifiedBadge.textContent = isDemo ? 'Mock Preview Response' : 'Grounded in Official Guidelines';
     header.appendChild(verifiedBadge);
     panel.appendChild(header);
+
+    // Audio Voice Player Button
+    const audioBar = document.createElement('div');
+    audioBar.className = 'audio-bar';
+
+    const listenBtn = document.createElement('button');
+    listenBtn.type = 'button';
+    listenBtn.className = 'listen-btn';
+    const labelText = LISTEN_LABELS[targetLang] || "Listen";
+    listenBtn.textContent = `🔊 ${labelText}`;
+
+    let cardAudio = null;
+    let cachedBase64 = null;
+
+    listenBtn.addEventListener('click', async () => {
+      // Toggle stop if already playing
+      if (listenBtn.classList.contains('playing')) {
+        if (cardAudio) {
+          cardAudio.pause();
+          cardAudio.currentTime = 0;
+        }
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        listenBtn.classList.remove('playing');
+        listenBtn.textContent = `🔊 ${labelText}`;
+        return;
+      }
+
+      // Stop any other active audio
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      document.querySelectorAll('.listen-btn.playing').forEach(b => {
+        b.classList.remove('playing');
+        b.textContent = b.dataset.originalLabel || '🔊 Listen';
+      });
+
+      listenBtn.dataset.originalLabel = `🔊 ${labelText}`;
+      listenBtn.disabled = true;
+      listenBtn.textContent = '⌛ Generating speech…';
+
+      const textToSpeak = data.answer_target_lang || data.answer_telugu || data.answer_english;
+
+      try {
+        if (!cachedBase64) {
+          const res = await fetch(`${API_BASE}/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: textToSpeak,
+              language_code: targetLang
+            })
+          });
+          const ttsData = await res.json();
+          if (ttsData.audio_base64) {
+            cachedBase64 = ttsData.audio_base64;
+          }
+        }
+
+        if (cachedBase64) {
+          cardAudio = new Audio('data:audio/wav;base64,' + cachedBase64);
+          activeAudio = cardAudio;
+          listenBtn.disabled = false;
+          listenBtn.classList.add('playing');
+          listenBtn.textContent = `⏹️ Stop`;
+
+          cardAudio.onended = () => {
+            listenBtn.classList.remove('playing');
+            listenBtn.textContent = `🔊 ${labelText}`;
+            activeAudio = null;
+          };
+          cardAudio.onerror = () => {
+            listenBtn.classList.remove('playing');
+            listenBtn.textContent = `🔊 ${labelText}`;
+            activeAudio = null;
+          };
+          cardAudio.play();
+        } else if (window.speechSynthesis) {
+          // Fallback to browser SpeechSynthesis
+          listenBtn.disabled = false;
+          listenBtn.classList.add('playing');
+          listenBtn.textContent = `⏹️ Stop`;
+
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          utterance.lang = targetLang;
+          utterance.onend = () => {
+            listenBtn.classList.remove('playing');
+            listenBtn.textContent = `🔊 ${labelText}`;
+          };
+          utterance.onerror = () => {
+            listenBtn.classList.remove('playing');
+            listenBtn.textContent = `🔊 ${labelText}`;
+          };
+          window.speechSynthesis.speak(utterance);
+        } else {
+          listenBtn.disabled = false;
+          listenBtn.textContent = `🔊 ${labelText}`;
+        }
+      } catch (err) {
+        console.error('Audio playback error:', err);
+        listenBtn.disabled = false;
+        listenBtn.classList.remove('playing');
+        listenBtn.textContent = `🔊 ${labelText}`;
+      }
+    });
+
+    audioBar.appendChild(listenBtn);
+    panel.appendChild(audioBar);
 
     // Primary Translated Answer
     const answerP = document.createElement('p');
@@ -820,6 +1020,57 @@
       if (q) handleAsk(q);
     });
   });
+
+  // Microphone Speech-to-Text Recognition
+  const micBtn = document.getElementById('mic-btn');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition && micBtn) {
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    let isRecording = false;
+
+    micBtn.addEventListener('click', () => {
+      if (isRecording) {
+        recognition.stop();
+        return;
+      }
+      const langCode = langSelect.value || 'en-IN';
+      recognition.lang = langCode;
+      try {
+        recognition.start();
+        isRecording = true;
+        micBtn.classList.add('recording');
+        input.placeholder = `Listening... Speak your question now`;
+      } catch (err) {
+        console.warn('Speech recognition start error:', err);
+      }
+    });
+
+    recognition.onresult = (e) => {
+      const spokenText = e.results[0][0].transcript;
+      input.value = spokenText;
+      handleAsk(spokenText);
+    };
+
+    recognition.onend = () => {
+      isRecording = false;
+      micBtn.classList.remove('recording');
+      input.placeholder = 'e.g. Is there a housing scheme for low income families?';
+    };
+
+    recognition.onerror = (e) => {
+      console.warn('Speech recognition error:', e.error);
+      isRecording = false;
+      micBtn.classList.remove('recording');
+      input.placeholder = 'e.g. Is there a housing scheme for low income families?';
+    };
+  } else if (micBtn) {
+    micBtn.title = "Voice recognition not supported in this browser";
+    micBtn.style.opacity = "0.4";
+  }
 
   // Initial load
   loadSchemes();

@@ -99,8 +99,16 @@ Navigate to `http://localhost:3000` (or open `frontend/index.html` as a local fi
 
 ---
 
+## Multilingual Voice Accessibility
+
+- **Text-to-Speech (TTS) via Sarvam Bulbul:v3**: Every answer card includes an audio playback button (`🔊 Listen / వినండి / सुनिए`) that converts answers into natural spoken audio across all 11 supported Indian languages.
+- **Dual-Engine Voice Playback**: Primary audio is generated via Sarvam's Bulbul:v3 model (`POST /tts`), with automatic fallback to the browser-native HTML5 Web Speech API (`window.speechSynthesis`).
+- **Speech-to-Text Input (Microphone 🎙️)**: Citizens can speak their questions directly into the input bar using Web Speech Recognition configured to their selected Indic language.
+
+---
+
 ## Tech Stack
 
-- **Backend:** FastAPI, `scikit-learn` (TF-IDF), `rank_bm25` (with pure-Python fallback), `langchain-text-splitters`, Sarvam AI SDK.
-- **Frontend:** Single-file HTML5/CSS3/Vanilla JS with native DOM manipulation, Google Fonts (Noto Sans for Telugu, Devanagari, Tamil, Kannada, Bengali).
-- **AI Models:** Sarvam `sarvam-105b` (LLM Generation), Sarvam Translate (Indic language translation).
+- **Backend:** FastAPI, `scikit-learn` (TF-IDF), `rank_bm25` (with pure-Python fallback), `langchain-text-splitters`, Sarvam AI SDK (`bulbul:v3` TTS, `sarvam-105b` LLM, Translate).
+- **Frontend:** Single-file HTML5/CSS3/Vanilla JS with native DOM manipulation, Google Fonts (Noto Sans for Telugu, Devanagari, Tamil, Kannada, Bengali), Web Speech API.
+- **AI Models:** Sarvam `sarvam-105b` (LLM Generation), Sarvam Translate (Language translation), Sarvam Bulbul:v3 (Text-to-Speech).

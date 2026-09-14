@@ -360,6 +360,12 @@ class QuestionRequest(BaseModel):
     target_language_code: Optional[str] = Field("te-IN", description="Target response language code (e.g., te-IN, hi-IN, ta-IN)")
 
 
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=3000, description="Text to convert to speech")
+    language_code: Optional[str] = Field("te-IN", description="Language code (e.g., te-IN, hi-IN, ta-IN)")
+    speaker: Optional[str] = Field("anushka", description="Voice persona")
+
+
 # ---------------------------------------------------------------------------
 # 6. REST API Endpoints
 # ---------------------------------------------------------------------------
@@ -541,4 +547,45 @@ def ask(payload: QuestionRequest):
         "sources": [s["title"] for s in matched_sources],
         "detailed_sources": matched_sources,
         "mode": "live" if sarvam_client else "demo",
+    }
+
+
+@app.post("/tts")
+def text_to_speech(payload: TTSRequest):
+    """
+    Synthesizes speech in any supported Indian language using Sarvam AI Bulbul v3.
+    """
+    text_clean = payload.text.strip()
+    # Remove markdown symbols and bullet points so speech sounds natural
+    text_clean = re.sub(r'[*_#`~>\[\]()]', ' ', text_clean)
+    text_clean = re.sub(r'\s+', ' ', text_clean).strip()
+
+    lang_code = payload.language_code or "te-IN"
+    if lang_code not in SUPPORTED_LANGUAGES:
+        lang_code = "te-IN"
+
+    if sarvam_client:
+        try:
+            tts_res = sarvam_client.text_to_speech.convert(
+                text=text_clean[:1200],  # Keep within single audio generation window
+                language_code=lang_code,
+                model="bulbul:v3",
+                output_audio_codec="wav",
+            )
+            if tts_res.audios and len(tts_res.audios) > 0:
+                return {
+                    "audio_base64": tts_res.audios[0],
+                    "format": "audio/wav",
+                    "language_code": lang_code,
+                    "mode": "live",
+                }
+        except Exception as exc:
+            print(f"[TTS Generation Error] {exc}")
+
+    return {
+        "audio_base64": None,
+        "format": None,
+        "use_browser_tts": True,
+        "language_code": lang_code,
+        "mode": "demo",
     }
