@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheme Sahayak — Government Scheme Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B2A4A;
+    --ink-soft: #4A5670;
+    --paper: #F5F6F1;
+    --surface: #FFFFFF;
+    --border: #DFDCCF;
+    --border-subtle: #EBE8DC;
+    --gold: #B8842E;
+    --gold-deep: #96691E;
+    --gold-light: rgba(184, 132, 46, 0.12);
+    --teal: #3D7A5C;
+    --teal-light: rgba(61, 122, 92, 0.1);
+    --radius-card: 14px;
+    --radius-chip: 999px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Indic Font Classes */
+  .font-te { font-family: 'Noto Sans Telugu', sans-serif; }
+  .font-hi, .font-mr { font-family: 'Noto Sans Devanagari', sans-serif; }
+  .font-ta { font-family: 'Noto Sans Tamil', sans-serif; }
+  .font-kn { font-family: 'Noto Sans Kannada', sans-serif; }
+  .font-bn { font-family: 'Noto Sans Bengali', sans-serif; }
+  .font-en { font-family: 'Inter', sans-serif; }
+
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header & Masthead */
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .masthead-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .masthead-mark .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .masthead-mark .brand-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .lang-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lang-picker label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  .lang-select {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .lang-select:focus {
+    border-color: var(--gold);
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4.5vw, 38px);
+    margin: 0;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+  }
+
+  h1 .lang-subtitle {
+    font-weight: 500;
+    font-size: 0.7em;
+    color: var(--ink-soft);
+    margin-left: 12px;
+  }
+
+  .tagline {
+    margin: 10px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 60ch;
+  }
+
+  /* Status Banner */
+  .notice {
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: var(--gold-light);
+    border: 1px solid rgba(184, 132, 46, 0.35);
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Ask Form */
+  form.ask {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .input-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 15.5px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184, 132, 46, 0.18);
+  }
+
+  button.ask-btn {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    background: var(--ink);
+    color: #FDFCF8;
+    border: none;
+    border-radius: 10px;
+    padding: 0 26px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.05s ease;
+    white-space: nowrap;
+  }
+
+  button.ask-btn:hover { background: var(--gold-deep); }
+  button.ask-btn:active { transform: scale(0.98); }
+  button.ask-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  button.ask-btn:disabled { opacity: 0.6; cursor: progress; }
+
+  /* Category Filter Chips */
+  .category-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    scrollbar-width: thin;
+  }
+
+  .cat-chip {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: var(--radius-chip);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+
+  .cat-chip:hover {
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  .cat-chip.active {
+    background: var(--ink);
+    color: #FFFFFF;
+    border-color: var(--ink);
+  }
+
+  /* Example Prompts */
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+
+  .example-chip {
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-chip);
+    padding: 6px 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .example-chip:hover {
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  /* Conversation stream */
+  #conversation {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .turn {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .user-q {
+    align-self: flex-end;
+    background: var(--ink);
+    color: #FDFCF8;
+    padding: 11px 18px;
+    border-radius: 14px 14px 2px 14px;
+    max-width: 82%;
+    font-size: 14.5px;
+    word-break: break-word;
+  }
+
+  /* Answer Card */
+  .answer-panel {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    padding: 22px 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    opacity: 0;
+    transform: translateY(6px);
+    animation: reveal 0.3s ease forwards;
+  }
+
+  @keyframes reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .answer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .answer-indic {
+    font-size: 18.5px;
+    line-height: 1.7;
+    margin: 0 0 16px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .english-ref-box {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+
+  details.ref-accordion summary {
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    user-select: none;
+    font-weight: 500;
+    outline: none;
+  }
+
+  details.ref-accordion summary:hover {
+    color: var(--ink);
+  }
+
+  .answer-en-content {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 10px 0 0;
+    line-height: 1.55;
+    background: #F9F9F6;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Sources section */
+  .sources-section {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .sources-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-right: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .source-chip {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--teal);
+    background: var(--teal-light);
+    border: 1px solid rgba(61, 122, 92, 0.25);
+    border-radius: var(--radius-chip);
+    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* Thinking / Loading Animation */
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 6px 2px;
+  }
+
+  .loading .pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  .loading .pulse:nth-child(2) { animation-delay: 0.15s; }
+  .loading .pulse:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Knowledge Base Footer */
+  .kb {
+    margin-top: 60px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .kb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .kb-header p {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .kb-count {
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: var(--surface);
+    padding: 3px 9px;
+    border-radius: var(--radius-chip);
+    border: 1px solid var(--border);
+  }
+
+  .kb-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .kb-chip {
+    font-size: 12.5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-chip);
+    padding: 5px 13px;
+    color: var(--ink);
+    transition: border-color 0.15s ease;
+  }
+
+  .kb-chip:hover {
+    border-color: var(--gold);
+  }
+
+  @media (max-width: 600px) {
+    main { padding: 32px 16px 60px; }
+    form.ask { flex-direction: column; }
+    button.ask-btn { padding: 13px; }
+    .user-q { max-width: 90%; }
+    .masthead-top { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .answer-panel { animation: none; opacity: 1; transform: none; }
+    .loading .pulse { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="masthead">
+    <div class="masthead-top">
+      <div class="masthead-mark">
+        <span class="dot"></span>
+        <span class="brand-name">Scheme Sahayak</span>
+      </div>
+      <div class="lang-picker">
+        <label for="language-select">Response Language:</label>
+        <select id="language-select" class="lang-select">
+          <option value="te-IN" selected>Telugu (తెలుగు)</option>
+          <option value="hi-IN">Hindi (हिन्दी)</option>
+          <option value="ta-IN">Tamil (தமிழ்)</option>
+          <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+          <option value="bn-IN">Bengali (বাংলা)</option>
+          <option value="mr-IN">Marathi (मराठी)</option>
+          <option value="gu-IN">Gujarati (ગુજરાતી)</option>
+          <option value="ml-IN">Malayalam (മലയാളം)</option>
+          <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
+          <option value="od-IN">Odia (ଓଡ଼ିଆ)</option>
+          <option value="en-IN">English</option>
+        </select>
+      </div>
+    </div>
+    <h1>Government Scheme Assistant<span class="lang-subtitle" id="masthead-subtitle">పథక సహాయకుడు</span></h1>
+    <p class="tagline">Ask questions about Indian central government welfare schemes in any language. Every answer is grounded in verified scheme guidelines via Hybrid Search & Sarvam AI.</p>
+  </header>
+
+  <div id="offline-notice" class="notice" style="display:none;">
+    <span>⚡ <strong>Offline / Demo Mode:</strong> Backend not connected. Showing curated mock responses with Hybrid RRF structure. Start the FastAPI backend for full live search and Sarvam-105b inference.</span>
+  </div>
+
+  <form class="ask" id="ask-form">
+    <div class="input-wrap">
+      <input type="text" id="question-input" placeholder="e.g. Is there a housing scheme for low income families?" autocomplete="off" maxlength="500" required>
+    </div>
+    <button type="submit" class="ask-btn" id="ask-btn">Ask Sahayak</button>
+  </form>
+
+  <div class="category-bar" id="category-bar">
+    <button type="button" class="cat-chip active" data-cat="all">All Domains</button>
+    <button type="button" class="cat-chip" data-cat="Agriculture & Farmers">Agriculture</button>
+    <button type="button" class="cat-chip" data-cat="Healthcare">Healthcare</button>
+    <button type="button" class="cat-chip" data-cat="Housing">Housing</button>
+    <button type="button" class="cat-chip" data-cat="Employment & Livelihood">Employment</button>
+    <button type="button" class="cat-chip" data-cat="Clean Energy & Women Welfare">Clean Energy</button>
+    <button type="button" class="cat-chip" data-cat="Women & Child Development">Women & Child</button>
+    <button type="button" class="cat-chip" data-cat="Financial Inclusion & Social Security">Social Security</button>
+    <button type="button" class="cat-chip" data-cat="Micro-Enterprise & Artisans">Artisans & Vendors</button>
+  </div>
+
+  <div class="examples" id="examples">
+    <button type="button" class="example-chip" data-q="Is there a housing scheme for low income families?">Housing support (PMAY)</button>
+    <button type="button" class="example-chip" data-q="How many days of work does MGNREGA guarantee?">MGNREGA 100 days guarantee</button>
+    <button type="button" class="example-chip" data-q="Is there a free cooking gas connection scheme?">Free LPG connection (Ujjwala)</button>
+    <button type="button" class="example-chip" data-q="Free hospital treatment up to 5 lakh rupees?">Ayushman Bharat (PM-JAY)</button>
+    <button type="button" class="example-chip" data-q="Income support for landholding farmers">PM-KISAN Rs 6,000 benefit</button>
+    <button type="button" class="example-chip" data-q="Working capital loan for street vendors">Street Vendor Loan (PM SVANidhi)</button>
+    <button type="button" class="example-chip" data-q="Savings scheme for girl child education">Sukanya Samriddhi Yojana</button>
+    <button type="button" class="example-chip" data-q="Financial aid and toolkit for traditional artisans">PM Vishwakarma Scheme</button>
+  </div>
+
+  <div id="conversation"></div>
+
+  <div class="kb">
+    <div class="kb-header">
+      <p>Indexed Central Welfare Schemes:</p>
+      <span class="kb-count" id="kb-count">12 Schemes</span>
+    </div>
+    <div class="kb-chips" id="kb-chips"></div>
+  </div>
+
+</main>
+
+<script>
+  const API_BASE = "http://localhost:8000";
+
+  // Cache DOM nodes
+  const form = document.getElementById('ask-form');
+  const input = document.getElementById('question-input');
+  const askBtn = document.getElementById('ask-btn');
+  const langSelect = document.getElementById('language-select');
+  const mastheadSubtitle = document.getElementById('masthead-subtitle');
+  const conversation = document.getElementById('conversation');
+  const offlineNotice = document.getElementById('offline-notice');
+  const kbChips = document.getElementById('kb-chips');
+  const kbCount = document.getElementById('kb-count');
+  const categoryBar = document.getElementById('category-bar');
+
+  // Subtitles by language
+  const SUBTITLES = {
+    "te-IN": "పథక సహాయకుడు",
+    "hi-IN": "योजना सहायक",
+    "ta-IN": "திட்ட உதவியாளர்",
+    "kn-IN": "ಯೋಜನಾ ಸಹಾಯಕ",
+    "bn-IN": "প্রকল্প সহায়ক",
+    "mr-IN": "योजना सहाय्यक",
+    "gu-IN": "યોજના સહાયક",
+    "ml-IN": "പദ്ധതി സഹായകൻ",
+    "pa-IN": "ਯੋਜਨਾ ਸਹਾਇਕ",
+    "od-IN": "ଯୋଜନା ସହାୟକ",
+    "en-IN": "Citizen Welfare Assistant"
+  };
+
+  const FONT_CLASSES = {
+    "te-IN": "font-te",
+    "hi-IN": "font-hi",
+    "ta-IN": "font-ta",
+    "kn-IN": "font-kn",
+    "bn-IN": "font-bn",
+    "mr-IN": "font-mr",
+    "gu-IN": "font-hi",
+    "ml-IN": "font-en",
+    "pa-IN": "font-hi",
+    "od-IN": "font-hi",
+    "en-IN": "font-en"
+  };
+
+  const FALLBACK_SCHEMES = [
+    { title: "PM-KISAN", category: "Agriculture & Farmers" },
+    { title: "Ayushman Bharat (PM-JAY)", category: "Healthcare" },
+    { title: "Pradhan Mantri Awas Yojana (PMAY)", category: "Housing" },
+    { title: "MGNREGA", category: "Employment & Livelihood" },
+    { title: "PM Ujjwala Yojana", category: "Clean Energy & Women Welfare" },
+    { title: "Sukanya Samriddhi Yojana", category: "Women & Child Development" },
+    { title: "PM SVANidhi", category: "Micro-Enterprise & Artisans" },
+    { title: "Atal Pension Yojana (APY)", category: "Financial Inclusion & Social Security" },
+    { title: "PM Vishwakarma Scheme", category: "Micro-Enterprise & Artisans" },
+    { title: "Pradhan Mantri Mudra Yojana (PMMY)", category: "Financial Inclusion & Social Security" },
+    { title: "Janani Suraksha Yojana (JSY)", category: "Healthcare" },
+    { title: "National Social Assistance Programme (NSAP)", category: "Financial Inclusion & Social Security" }
+  ];
+
+  let catalogSchemes = [...FALLBACK_SCHEMES];
+
+  // Language change listener
+  langSelect.addEventListener('change', () => {
+    const code = langSelect.value;
+    mastheadSubtitle.textContent = SUBTITLES[code] || "పథక సహాయకుడు";
+    mastheadSubtitle.className = `lang-subtitle ${FONT_CLASSES[code] || 'font-te'}`;
+  });
+
+  // Safe DOM helpers (Strict XSS Prevention complying with mandatory-secure-web-skills)
+  function renderSchemeChips(schemes) {
+    kbChips.replaceChildren();
+    schemes.forEach(s => {
+      const chip = document.createElement('span');
+      chip.className = 'kb-chip';
+      chip.textContent = typeof s === 'string' ? s : (s.short_name || s.title);
+      chip.title = s.category ? `Domain: ${s.category}` : '';
+      kbChips.appendChild(chip);
+    });
+    kbCount.textContent = `${schemes.length} Schemes`;
+  }
+
+  async function loadSchemes() {
+    try {
+      const res = await fetch(`${API_BASE}/schemes`);
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      if (data.schemes && data.schemes.length > 0) {
+        catalogSchemes = data.schemes;
+        renderSchemeChips(catalogSchemes);
+        offlineNotice.style.display = 'none';
+        return;
+      }
+    } catch {
+      offlineNotice.style.display = 'flex';
+    }
+    renderSchemeChips(FALLBACK_SCHEMES);
+  }
+
+  // Category Filtering
+  categoryBar.addEventListener('click', (e) => {
+    const chip = e.target.closest('.cat-chip');
+    if (!chip) return;
+
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+
+    const cat = chip.dataset.cat;
+    if (cat === 'all') {
+      renderSchemeChips(catalogSchemes);
+    } else {
+      const filtered = catalogSchemes.filter(s => s.category && s.category.includes(cat));
+      renderSchemeChips(filtered.length ? filtered : catalogSchemes);
+    }
+  });
+
+  function addUserTurn(question) {
+    const turn = document.createElement('div');
+    turn.className = 'turn';
+
+    const userBubble = document.createElement('div');
+    userBubble.className = 'user-q';
+    userBubble.textContent = question; // Safe text insertion
+    turn.appendChild(userBubble);
+
+    conversation.appendChild(turn);
+    return turn;
+  }
+
+  function addLoading(turn) {
+    const loading = document.createElement('div');
+    loading.className = 'loading';
+
+    const p1 = document.createElement('span'); p1.className = 'pulse';
+    const p2 = document.createElement('span'); p2.className = 'pulse';
+    const p3 = document.createElement('span'); p3.className = 'pulse';
+    const text = document.createTextNode(' Scheme Sahayak is analyzing verified documents…');
+
+    loading.append(p1, p2, p3, text);
+    turn.appendChild(loading);
+    return loading;
+  }
+
+  function renderAnswerCard(turn, loadingEl, data, targetLang, isDemo) {
+    loadingEl.remove();
+
+    const panel = document.createElement('div');
+    panel.className = 'answer-panel';
+
+    // Header label
+    const header = document.createElement('div');
+    header.className = 'answer-header';
+    const verifiedBadge = document.createElement('span');
+    verifiedBadge.textContent = isDemo ? 'Mock Preview Response' : 'Grounded in Official Guidelines';
+    header.appendChild(verifiedBadge);
+    panel.appendChild(header);
+
+    // Primary Translated Answer
+    const answerP = document.createElement('p');
+    const fontClass = FONT_CLASSES[targetLang] || 'font-te';
+    answerP.className = `answer-indic ${fontClass}`;
+    answerP.textContent = data.answer_target_lang || data.answer_telugu || data.answer_english;
+    panel.appendChild(answerP);
+
+    // English Reference Accordion
+    if (data.answer_english && targetLang !== 'en-IN') {
+      const refBox = document.createElement('div');
+      refBox.className = 'english-ref-box';
+
+      const details = document.createElement('details');
+      details.className = 'ref-accordion';
+
+      const summary = document.createElement('summary');
+      summary.textContent = 'View verified English source text';
+      details.appendChild(summary);
+
+      const enContent = document.createElement('p');
+      enContent.className = 'answer-en-content';
+      enContent.textContent = data.answer_english;
+      details.appendChild(enContent);
+
+      refBox.appendChild(details);
+      panel.appendChild(refBox);
+    }
+
+    // Sources Section
+    const sourcesSection = document.createElement('div');
+    sourcesSection.className = 'sources-section';
+
+    const sourcesLabel = document.createElement('span');
+    sourcesLabel.className = 'sources-label';
+    sourcesLabel.textContent = 'Sources:';
+    sourcesSection.appendChild(sourcesLabel);
+
+    const sources = data.sources || [];
+    if (sources.length === 0) {
+      const emptyChip = document.createElement('span');
+      emptyChip.className = 'source-chip';
+      emptyChip.textContent = 'General Knowledge Base';
+      sourcesSection.appendChild(emptyChip);
+    } else {
+      sources.forEach(src => {
+        const chip = document.createElement('span');
+        chip.className = 'source-chip';
+        chip.textContent = typeof src === 'string' ? src : (src.title || src.short_name);
+        sourcesSection.appendChild(chip);
+      });
+    }
+    panel.appendChild(sourcesSection);
+
+    turn.appendChild(panel);
+    if (isDemo) {
+      offlineNotice.style.display = 'flex';
+    }
+  }
+
+  async function handleAsk(question) {
+    const cleanQ = question.trim();
+    if (!cleanQ) return;
+
+    const targetLang = langSelect.value || 'te-IN';
+    const turn = addUserTurn(cleanQ);
+    const loadingEl = addLoading(turn);
+    askBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: cleanQ,
+          target_language_code: targetLang
+        })
+      });
+
+      if (!res.ok) throw new Error('API server returned error');
+      const data = await res.json();
+      renderAnswerCard(turn, loadingEl, data, targetLang, data.mode === 'demo');
+      if (data.mode === 'live') {
+        offlineNotice.style.display = 'none';
+      }
+    } catch (err) {
+      // Local fallback handler
+      await new Promise(r => setTimeout(r, 600));
+
+      const fallbackData = {
+        answer_english: "Pradhan Mantri Awas Yojana (PMAY) provides affordable housing support to low-income and economically weaker households, including interest subsidies on home loans and direct financial assistance for construction in rural areas.",
+        answer_target_lang: "అవును — ప్రధాన మంత్రి ఆవాస్ యోజన (PMAY) తక్కువ ఆదాయం, ఆర్థికంగా బలహీన కుటుంబాలకు గృహ రుణాలపై వడ్డీ రాయితీలతో పాటు గ్రామీణ ప్రాంతాల్లో నిర్మాణానికి ప్రత్యక్ష ఆర్థిక సహాయం అందిస్తుంది.",
+        sources: ["Pradhan Mantri Awas Yojana (PMAY - Urban & Gramin)"]
+      };
+
+      renderAnswerCard(turn, loadingEl, fallbackData, targetLang, true);
+    } finally {
+      askBtn.disabled = false;
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = input.value;
+    handleAsk(q);
+    input.value = '';
+  });
+
+  document.querySelectorAll('.example-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.dataset.q;
+      if (q) handleAsk(q);
+    });
+  });
+
+  // Initial load
+  loadSchemes();
+</script>
+</body>
+</html>
