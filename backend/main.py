@@ -471,6 +471,7 @@ def ask(payload: QuestionRequest):
             try:
                 completion = sarvam_client.chat.completions(
                     model="sarvam-105b",
+                    max_tokens=1024,
                     messages=[
                         {
                             "role": "system",
@@ -489,7 +490,13 @@ def ask(payload: QuestionRequest):
                         },
                     ],
                 )
-                answer_en = completion.choices[0].message.content.strip()
+                msg = completion.choices[0].message
+                answer_en = (msg.content or "").strip()
+                if not answer_en and getattr(msg, "reasoning_content", None):
+                    answer_en = msg.reasoning_content.strip()
+                if not answer_en:
+                    top = matches[0]
+                    answer_en = f"Under {top['title']}, eligible beneficiaries receive: {top['benefits']}."
             except Exception as exc:
                 print(f"[LLM Error] Falling back to synthesized answer: {exc}")
                 top = matches[0]
